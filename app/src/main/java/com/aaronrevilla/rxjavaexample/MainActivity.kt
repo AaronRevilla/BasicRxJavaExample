@@ -33,13 +33,13 @@ class MainActivity : AppCompatActivity() {
             displayText.setText("")
             var buffer = StringBuffer()
             Observable.just(getArrayListOfRandomNum())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .flatMap({list -> getEvenNumbers(list)})
+                    .subscribeOn(Schedulers.computation())//Observable thread
+                    .observeOn(AndroidSchedulers.mainThread())//Observer thread
                     .subscribe(object:Observer<ArrayList<Int>>{
                         override fun onComplete() {
                             displayText.setText(buffer.toString())
                         }
-
                         override fun onSubscribe(d: Disposable) {
                             Log.d("RxJava", "OnSubscribe")
                         }
@@ -55,9 +55,6 @@ class MainActivity : AppCompatActivity() {
 
                     })
         }
-
-
-
 
     }
 
@@ -89,6 +86,14 @@ class MainActivity : AppCompatActivity() {
         //var rand = Random()
         //return rand.nextInt();
         return Random().nextInt()//same result different approach
+    }
+
+    fun getEvenNumbers(list: ArrayList<Int>): Observable<ArrayList<Int>>{
+        var evenNumbers: ArrayList<Int> = arrayListOf();
+        for (item in list){
+            if(item%2 == 0) evenNumbers.add(item)
+        }
+        return Observable.just(evenNumbers);
     }
 
 }
